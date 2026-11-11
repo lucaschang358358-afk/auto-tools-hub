@@ -5,18 +5,25 @@ import glob
 import datetime
 from google import genai
 
-# 1. Initialize API client
+# 1. 初始化 API Client
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
-# 2. Priority model list
+# 優先採用的模型清單
 CANDIDATE_MODELS = [
     "gemini-3.5-flash-lite",
     "gemini-3.8-flash",
     "gemini-3.5-flash",
 ]
 
-# 3. Load historical records to prevent duplicate topics
+# 2. 獲取使用者在 GitHub Actions 輸入的主題
+user_topic = os.environ.get("CUSTOM_TOPIC", "").strip()
+if not user_topic:
+    user_topic = "Everyday Practical Utility"
+
+print(f"Target Tool Topic: {user_topic}")
+
+# 3. 讀取歷史清單以防重複記錄
 HISTORY_FILE = "history.json"
 if os.path.exists(HISTORY_FILE):
     with open(HISTORY_FILE, "r", encoding="utf-8") as f:
@@ -24,37 +31,23 @@ if os.path.exists(HISTORY_FILE):
 else:
     history = []
 
-past_topics_str = ", ".join(history[-60:]) if history else "None"
-
-# 4. Prompt: High-demand, mass-audience consumer web utility
+# 4. 針對指定主題撰寫嚴格 Prompt（無外連贊助、純前端完整功能）
 prompt = f"""
-Identify a high-demand, practical, client-side web utility tool used by EVERYDAY PEOPLE (students, office workers, social media creators, general consumers). 
-
-DO NOT generate developer-only, coding, or CSS tools (e.g. NO regex, NO flexbox, NO CSS generators, NO code compilers).
-
-Target categories for normal everyday people:
-- Social media text styling, line breaker for Instagram/Threads, hashtag counter.
-- Student & writing helpers: word/character counter with reading time estimation, sentence case converters, duplicate line remover, text cleaner.
-- Finance & everyday calculators: tip & split bill calculator, discount/tax calculator, mortgage/loan monthly payment estimator, savings goal tracker.
-- Lifestyle & productivity: sleep cycle calculator (optimal wake-up times), Pomodoro timer, simple habit streak counter, random choice/name picker wheel.
-
-[Previously Created Tools - DO NOT DUPLICATE]:
-[{past_topics_str}]
+Build a complete, standalone, production-ready single-file HTML5 utility web app for the following topic:
+Topic: {user_topic}
 
 Requirements:
-1. Avoid any topic from the list above. Choose a tool that ANY normal user finds immediately useful.
-2. First line must strictly be formatted as: TOPIC_NAME: <Short Tool Name in English>
-3. Followed by a complete, production-ready, single-file HTML5 document containing modern CSS and vanilla JavaScript.
-4. UI & Tech Specs:
-   - Beautiful, sleek modern design (clean typography, intuitive controls, instant calculation/preview, one-click copy button).
-   - 100% client-side logic (runs in browser, fast, privacy-friendly).
-   - Clear input labels and instructions suitable for non-technical users.
-   - Insert a clean support note at the bottom:
-     '<div style="text-align:center;margin-top:24px;font-size:12px;color:#888;">Free tool. Support via <a href="https://paypal.me/your_paypal_username" target="_blank" style="color:#38bdf8;">PayPal</a></div>'
-5. Wrap the entire HTML code inside ```html ... ``` code block. Do not provide conversational filler.
+1. First line must strictly be formatted as: TOPIC_NAME: {user_topic}
+2. Followed by a complete, functional, single-file HTML5 document containing modern CSS and vanilla JavaScript.
+3. Design & Functional Specs:
+   - Modern, sleek dark-themed UI (deep dark background #0f172a, clean cards #1e293b, crisp typography, intuitive interactive buttons and inputs).
+   - 100% functional client-side logic using vanilla JavaScript (instant calculations, inputs validation, interactive dashboard or preview).
+   - Practical, polished user experience suited for ordinary people (students, consumers, everyday users).
+   - DO NOT include any donation, PayPal, BuyMeACoffee, or external sponsor links.
+4. Wrap the entire HTML code inside ```html ... ``` code block. Do not provide conversational filler.
 """
 
-# 5. Call API with fallback support
+# 5. 呼叫 Gemini API
 content = None
 chosen_model = None
 
@@ -66,10 +59,10 @@ for model_name in CANDIDATE_MODELS:
         )
         content = response.text
         chosen_model = model_name
-        print(f"Successfully generated using model: {chosen_model}")
+        print(f"Successfully generated using: {chosen_model}")
         break
     except Exception as e:
-        print(f"Model {model_name} failed: {e}. Trying next...")
+        print(f"Model {model_name} failed: {e}. Trying next candidate...")
         continue
 
 if not content:
@@ -80,6 +73,8 @@ if not content:
                 try:
                     res = client.models.generate_content(model=fallback_name, contents=prompt)
                     content = res.text
+                    chosen_model = fallback_name
+                    print(f"Successfully generated using fallback: {chosen_model}")
                     break
                 except Exception:
                     continue
@@ -89,29 +84,26 @@ if not content:
 if not content:
     raise RuntimeError("All models failed. Please verify API key status.")
 
-# 6. Extract topic name and record to history
-topic_match = re.search(r"TOPIC_NAME:\s*(.+)", content)
-topic_name = topic_match.group(1).strip() if topic_match else f"Tool_{datetime.datetime.now().strftime('%Y%m%d%H%M')}"
-history.append(topic_name)
-
+# 6. 記錄主題至歷史檔
+history.append(user_topic)
 with open(HISTORY_FILE, "w", encoding="utf-8") as f:
     json.dump(history, f, ensure_ascii=False, indent=2)
 
-# 7. Extract HTML and save tool
+# 7. 提取 HTML 並存入 tools/ 資料夾
 html_match = re.search(r"```html\s*(.*?)\s*```", content, re.DOTALL)
 html_code = html_match.group(1) if html_match else content
 
 os.makedirs("tools", exist_ok=True)
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-safe_slug = re.sub(r'[^a-zA-Z0-9_-]', '_', topic_name.lower())[:30]
+safe_slug = re.sub(r'[^a-zA-Z0-9_-]', '_', user_topic.lower())[:30]
 filename = f"tools/{safe_slug}_{timestamp}.html"
 
 with open(filename, "w", encoding="utf-8") as f:
     f.write(html_code)
 
-print(f"Saved new tool: {filename}")
+print(f"Tool created successfully: {filename}")
 
-# 8. Auto-generate modern index.html (Catalog Hub)
+# 8. 自動更新首頁 index.html 目錄
 all_tools = sorted(glob.glob("tools/*.html"), reverse=True)
 tool_links_html = ""
 for t_path in all_tools:
@@ -130,8 +122,8 @@ index_html_content = f"""<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto Tools Hub - Everyday Free Online Utilities</title>
-  <meta name="description" content="A growing collection of free, useful daily tools for productivity, social media, studying, and finance.">
+  <title>Auto Tools Hub - Useful Daily Utilities</title>
+  <meta name="description" content="A curated collection of practical everyday web tools for productivity, finance, and daily life.">
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 40px 20px; }}
@@ -152,7 +144,7 @@ index_html_content = f"""<!DOCTYPE html>
   <div class="container">
     <header>
       <h1>Auto Tools Hub</h1>
-      <p class="subtitle">Fast, free, and practical daily tools for everyone.</p>
+      <p class="subtitle">Practical and intuitive daily utilities for everyone.</p>
     </header>
     <div class="grid">
       {tool_links_html}
