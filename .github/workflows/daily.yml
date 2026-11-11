@@ -1,10 +1,12 @@
-name: Auto Deploy Tool (Twice Daily)
+name: Deploy Custom Tool
 
 on:
-  schedule:
-    # Runs twice daily at UTC 22:00 and UTC 10:00 (09:00 AM & 21:00 PM AEST/AEDT)
-    - cron: '0 10,22 * * *'
   workflow_dispatch:
+    inputs:
+      tool_topic:
+        description: '請輸入這次要做的小工具主題（例如：記帳工具、番茄鐘、睡眠計算器）：'
+        required: true
+        default: 'Personal Expense Tracker'
 
 jobs:
   build-and-deploy:
@@ -24,9 +26,10 @@ jobs:
       - name: Install Dependencies
         run: pip install google-genai
 
-      - name: Generate New Tool
+      - name: Generate Custom Tool
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || secrets.AI_API_KEY }}
+          CUSTOM_TOPIC: ${{ github.event.inputs.tool_topic }}
         run: python generate.py
 
       - name: Commit and Push Changes
@@ -34,5 +37,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add .
-          git commit -m "Auto generated new tool: $(date +'%Y-%m-%d %H:%M')" || exit 0
+          git commit -m "Generated tool: ${{ github.event.inputs.tool_topic }}" || exit 0
           git push
