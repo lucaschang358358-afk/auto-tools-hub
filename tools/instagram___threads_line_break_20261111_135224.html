@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram & Threads Line Break Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between py-8 px-4 sm:px-6">
+
+    <div class="max-w-2xl w-full mx-auto space-y-8">
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 rounded-2xl shadow-lg mb-2">
+                <i class="fa-solid fa-align-left text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight text-white">Instagram & Threads Line Breaker</h1>
+            <p class="text-slate-400 text-sm sm:text-base max-w-lg mx-auto">
+                Fix disappearing spaces and line breaks in your Instagram and Threads captions instantly. No more weird dots or symbols needed!
+            </p>
+        </header>
+
+        <!-- Main Card -->
+        <main class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-6">
+            
+            <!-- Input Section -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <label for="inputText" class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-rose-500"></i> Type or paste your caption:
+                    </label>
+                    <button id="clearBtn" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Clear
+                    </button>
+                </div>
+                <textarea id="inputText" rows="7" 
+                    placeholder="Write your caption here...&#10;Use normal spacing and paragraphs.&#10;&#10;Hashtags will stay at the bottom just how you want them!"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition text-sm sm:text-base"></textarea>
+            </div>
+
+            <!-- Options / Stats Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800/80">
+                <div class="flex items-center gap-3 text-xs text-slate-400">
+                    <span class="bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                        Chars: <strong id="charCount" class="text-slate-200">0</strong> / 2,200
+                    </span>
+                    <span class="bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                        Emojis: <strong id="emojiCount" class="text-slate-200">0</strong>
+                    </span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                        <input type="checkbox" id="removeDots" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-rose-500 focus:ring-offset-slate-900">
+                        <span>Remove invisible line characters (Strict mode)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button id="convertBtn" class="w-full bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-rose-500/20 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2 text-base">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Convert for Instagram & Threads
+            </button>
+
+            <!-- Output Section -->
+            <div class="space-y-2 pt-4 border-t border-slate-800/80">
+                <div class="flex justify-between items-center">
+                    <label for="outputText" class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-emerald-500"></i> Formatted Output:
+                    </label>
+                    <span id="copyFeedback" class="text-xs text-emerald-400 opacity-0 transition-opacity duration-300 font-medium">
+                        <i class="fa-solid fa-check"></i> Copied to clipboard!
+                    </span>
+                </div>
+                <div class="relative">
+                    <textarea id="outputText" rows="7" readonly
+                        placeholder="Your clean formatted caption will appear here ready to copy..."
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition text-sm sm:text-base"></textarea>
+                </div>
+                <button id="copyBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <i class="fa-regular fa-copy"></i> Copy Clean Text
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Support Note -->
+    <div style="text-align:center;margin-top:24px;font-size:12px;color:#888;">Free tool. Support via <a href="https://paypal.me/your_paypal_username" target="_blank" style="color:#38bdf8;">PayPal</a></div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const convertBtn = document.getElementById('convertBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const removeDots = document.getElementById('removeDots');
+        const charCount = document.getElementById('charCount');
+        const emojiCount = document.getElementById('emojiCount');
+        const copyFeedback = document.getElementById('copyFeedback');
+
+        // Zero-width space character used to preserve empty lines on IG/Threads
+        const ZERO_WIDTH_SPACE = '⠀'; // Braille pattern blank (reliable on IG)
+
+        function updateStats(text) {
+            charCount.textContent = text.length;
+            if (text.length > 2200) {
+                charCount.classList.add('text-rose-400');
+            } else {
+                charCount.classList.remove('text-rose-400');
+            }
+
+            // Simple emoji regex counter
+            const emojis = text.match(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
+            emojiCount.textContent = emojis ? emojis.length : 0;
+        }
+
+        inputText.addEventListener('input', (e) => {
+            updateStats(e.target.value);
+            processText();
+        });
+
+        removeDots.addEventListener('change', processText);
+
+        function processText() {
+            let text = inputText.value;
+            
+            // Normalize line endings
+            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+            if (removeDots.checked) {
+                // Just clean standard extra spaces without zero-width spaces
+                outputText.value = text.trim();
+                return;
+            }
+
+            // Split into lines, replace empty lines with zero-width space
+            let lines = text.split('\n');
+            let processedLines = lines.map(line => {
+                if (line.trim() === '') {
+                    return ZERO_WIDTH_SPACE;
+                }
+                return line;
+            });
+
+            outputText.value = processedLines.join('\n');
+        }
+
+        convertBtn.addEventListener('click', () => {
+            processText();
+            convertBtn.classList.add('scale-95');
+            setTimeout(() => convertBtn.classList.remove('scale-95'), 150);
+        });
+
+        copyBtn.addEventListener('click', () => {
+            if (!outputText.value) return;
+            
+            navigator.clipboard.writeText(outputText.value).then(() => {
+                copyFeedback.style.opacity = '1';
+                setTimeout(() => {
+                    copyFeedback.style.opacity = '0';
+                }, 2000);
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            inputText.value = '';
+            outputText.value = '';
+            updateStats('');
+            inputText.focus();
+        });
+    </script>
+</body>
+</html>
