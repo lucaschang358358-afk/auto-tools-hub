@@ -4,14 +4,10 @@ import json
 import datetime
 import google.generativeai as genai
 
-# 1. Initialize API with Google Search grounding
+# 1. Initialize Gemini API
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    tools=[{"google_search": {}}]
-)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # 2. Load historical records to ensure zero duplicates
 HISTORY_FILE = "history.json"
@@ -23,9 +19,9 @@ else:
 
 past_topics_str = ", ".join(history[-60:]) if history else "None"
 
-# 3. Prompt: Search Google for trending micro-tool keywords and generate a unique client-side tool
+# 3. Prompt: High-demand, low-competition client-side utility
 prompt = f"""
-Search Google to find high-demand, high-search-volume utility keywords and pain points for browser-based micro tools (e.g. developer utilities, text manipulation, format converters, calculators, generators).
+Identify a high-demand, practical, client-side web utility tool based on common global developer and productivity search trends (e.g. text manipulation, format converters, calculators, format validators, CSS generators).
 
 [Previously Created Tools - DO NOT DUPLICATE]:
 [{past_topics_str}]
