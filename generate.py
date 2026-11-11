@@ -26,22 +26,29 @@ else:
 
 past_topics_str = ", ".join(history[-60:]) if history else "None"
 
-# 4. Prompt: High-demand, practical client-side utility
+# 4. Prompt: High-demand, mass-audience consumer web utility
 prompt = f"""
-Identify a high-demand, practical, client-side web utility tool based on common global developer and productivity search trends (e.g. text manipulation, format converters, calculators, format validators, CSS generators).
+Identify a high-demand, practical, client-side web utility tool used by EVERYDAY PEOPLE (students, office workers, social media creators, general consumers). 
+
+DO NOT generate developer-only, coding, or CSS tools (e.g. NO regex, NO flexbox, NO CSS generators, NO code compilers).
+
+Target categories for normal everyday people:
+- Social media text styling, line breaker for Instagram/Threads, hashtag counter.
+- Student & writing helpers: word/character counter with reading time estimation, sentence case converters, duplicate line remover, text cleaner.
+- Finance & everyday calculators: tip & split bill calculator, discount/tax calculator, mortgage/loan monthly payment estimator, savings goal tracker.
+- Lifestyle & productivity: sleep cycle calculator (optimal wake-up times), Pomodoro timer, simple habit streak counter, random choice/name picker wheel.
 
 [Previously Created Tools - DO NOT DUPLICATE]:
 [{past_topics_str}]
 
 Requirements:
-1. Avoid any topic from the list above. Choose a highly practical, standalone, client-side web utility.
+1. Avoid any topic from the list above. Choose a tool that ANY normal user finds immediately useful.
 2. First line must strictly be formatted as: TOPIC_NAME: <Short Tool Name in English>
 3. Followed by a complete, production-ready, single-file HTML5 document containing modern CSS and vanilla JavaScript.
 4. UI & Tech Specs:
-   - Modern, sleek dark-themed UI (clean typography, rounded cards, input/output sections, copy-to-clipboard button).
-   - 100% client-side (no backend or external API keys required).
-   - Valid HTML, modern CSS, and robust error-free JavaScript.
-   - Include standard SEO tags (title, meta description) matching the target utility keyword.
+   - Beautiful, sleek modern design (clean typography, intuitive controls, instant calculation/preview, one-click copy button).
+   - 100% client-side logic (runs in browser, fast, privacy-friendly).
+   - Clear input labels and instructions suitable for non-technical users.
    - Insert a clean support note at the bottom:
      '<div style="text-align:center;margin-top:24px;font-size:12px;color:#888;">Free tool. Support via <a href="https://paypal.me/your_paypal_username" target="_blank" style="color:#38bdf8;">PayPal</a></div>'
 5. Wrap the entire HTML code inside ```html ... ``` code block. Do not provide conversational filler.
@@ -123,8 +130,8 @@ index_html_content = f"""<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto Tools Hub - Free Instant Web Utilities</title>
-  <meta name="description" content="A growing collection of free, client-side developer and productivity micro-tools. Fast, secure, and privacy-first.">
+  <title>Auto Tools Hub - Everyday Free Online Utilities</title>
+  <meta name="description" content="A growing collection of free, useful daily tools for productivity, social media, studying, and finance.">
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 40px 20px; }}
@@ -145,13 +152,13 @@ index_html_content = f"""<!DOCTYPE html>
   <div class="container">
     <header>
       <h1>Auto Tools Hub</h1>
-      <p class="subtitle">Curated collection of instant, secure, client-side web tools. Updated daily.</p>
+      <p class="subtitle">Fast, free, and practical daily tools for everyone.</p>
     </header>
     <div class="grid">
       {tool_links_html}
     </div>
     <footer>
-      &copy; {datetime.datetime.now().year} Auto Tools Hub. Built for fast productivity.
+      &copy; {datetime.datetime.now().year} Auto Tools Hub. Practical utilities for daily life.
     </footer>
   </div>
 </body>
@@ -161,4 +168,4 @@ index_html_content = f"""<!DOCTYPE html>
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(index_html_content)
 
-print("Catalog index.html successfully generated and updated!")
+print("Catalog index.html successfully updated!")
